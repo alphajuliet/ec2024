@@ -15,7 +15,10 @@
        (map Integer/parseInt)
        get-strikes))
 
+(def part2 part1)
+
 (comment
   (part1 "data/q04_p1_test.txt")
   (part1 "data/q04_p1.txt")
+  (part2 "data/q04_p2.txt")
   )
