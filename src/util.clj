@@ -17,5 +17,7 @@
   "Return the dimensions of the grid"
   [grid]
   [(count grid) (count (first grid))])
+
+(def T (partial apply mapv vector))
   
 ;; The End
