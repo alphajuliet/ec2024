@@ -24,7 +24,9 @@
     {:val val 
      :vec (concat (take idx vec) (drop (inc idx) vec))}))
 
-(defn- f [n x] (- n (abs (- n x))))
+(defn- f [n x] 
+  #_(- n (abs (- n x)))
+    (abs (- (mod (+ x n) (* 2 n)) n)))
 
 (defn front-numbers
   "Return the number formed from the front of each column"
@@ -41,18 +43,32 @@
         src (nth columns src-col)
         dest (nth columns dest-col)
         x (first src)
-        new-dest (insert-at dest (f (count src)(dec x)) x)]
+        new-dest (insert-at dest (f (count dest) (dec x)) x)]
     (-> columns
         (assoc src-col (vec (rest src)))
         (assoc dest-col new-dest))))
 
 (defn play-rounds
-  "Play a single round"
-  [columns rounds]
+  "Play n rounds"
+  [columns n]
   (reduce (fn [cols col]
             (move-number cols (mod col (count cols))))
           columns
-          (range rounds)))
+          (range n)))
+
+(defn play-rounds-2
+  "Play rounds until we see one number 2024 times"
+  [columns]
+  (loop [cols columns
+         counts {}
+         round 0]
+    (let [cols' (move-number cols (mod round (count columns)))
+          shout (front-numbers cols')
+          counts' (update counts shout (fnil inc 0))]
+      (if (= 2024 (get counts' shout))
+        (list shout (inc round)) ; return a tuple
+        ;; else
+        (recur cols' counts' (inc round))))))
 
 (defn part1
   [fname]
@@ -61,11 +77,22 @@
         (play-rounds 10)
         front-numbers)))
 
+(defn part2
+  [fname]
+  (let [init (->> fname read-data)]
+    (->> init
+        (play-rounds-2)
+        (apply *))))
+
 (comment
-  (def testf "data/q05_p1_test.txt")
-  (def inputf "data/q05_p1.txt")
+  (def testf1 "data/q05_p1_test.txt")
+  (def inputf1 "data/q05_p1.txt")
+  (def testf2 "data/q05_p2_test.txt")
+  (def inputf2 "data/q05_p2.txt")
   
-  (part1 testf)
-  (part1 inputf))
+  (part1 testf1)
+  (part1 inputf1)
+  (part2 testf2)
+  (part2 inputf2))
 
 ;; The End
