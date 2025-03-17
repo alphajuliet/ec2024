@@ -1,6 +1,7 @@
 (ns q05
-  (:require [util :as util]
-            [clojure.string :as str]))
+  (:require
+   [clojure.string :as str]
+   [util :as util]))
 
 (defn read-data 
   "Read in the data as a list of columns"
@@ -9,6 +10,7 @@
        slurp
        str/split-lines
        (mapv #(str/split % #" "))
+       #_(mapv #(mapv bigint %))
        (mapv #(mapv Integer/parseInt %))
        util/T))
 
@@ -34,7 +36,8 @@
   (->> columns
        (map first)
        str/join
-       Integer/parseInt))
+       #_(Integer/parseInt)
+       (bigint)))
 
 (defn move-number
   "Move the first number from src-col to the next column, in the appropriate position"
@@ -70,6 +73,20 @@
         ;; else
         (recur cols' counts' (inc round))))))
 
+(defn play-rounds-3
+  "Play rounds until we see repetition"
+  [columns]
+  (loop [cols columns
+         counts {}
+         round 0]
+    (let [cols' (move-number cols (mod round (count columns)))
+          shout (front-numbers cols')
+          counts' (update counts shout (fnil inc 0))]
+      (if (= 10 (get counts' shout))
+        (keys counts')
+        ;; else
+        (recur cols' counts' (inc round))))))
+
 (defn part1
   [fname]
   (let [init (->> fname read-data)]
@@ -84,15 +101,25 @@
         (play-rounds-2)
         (apply *))))
 
+(defn part3
+  [fname]
+  (let [init (->> fname read-data)]
+    (->> init
+         (play-rounds-3)
+         (apply max))))
+
 (comment
   (def testf1 "data/q05_p1_test.txt")
   (def inputf1 "data/q05_p1.txt")
   (def testf2 "data/q05_p2_test.txt")
   (def inputf2 "data/q05_p2.txt")
+  (def inputf3 "data/q05_p3.txt")
   
   (part1 testf1)
   (part1 inputf1)
   (part2 testf2)
-  (part2 inputf2))
+  (part2 inputf2)
+  (part3 testf2)
+  (part3 inputf3))
 
 ;; The End
