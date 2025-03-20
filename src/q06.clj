@@ -30,19 +30,37 @@
            (filter some?)
            vec))))
 
+(defn find-unique-path
+  "Find the path with the unique length"
+  [tree]
+  (->> (paths-dfs tree "RR" #{})
+         (group-by count)
+         (vals)
+         (apply min-key count)
+         first))
+
 (defn part1
   [fname]
   (let [input-string (slurp fname)
         tree (parse-tree input-string)]
-    (->> (paths-dfs tree "RR" #{})
-         (group-by count)
-         (vals)
-         (apply min-key count)
-         first
+    (->> tree
+         find-unique-path
+         (str/join))))
+
+(defn part2
+  [fname]
+  (let [input-string (slurp fname)
+        tree (parse-tree input-string)]
+    (->> tree
+         find-unique-path
+         (map first)
          (str/join))))
 
 (comment
   (def testf1 "data/q06_p1_test.txt")
   (def inputf1 "data/q06_p1.txt")
+  (def inputf2 "data/q06_p2.txt")
+
   (part1 testf1)
-  (part1 inputf1))
+  (part1 inputf1)
+  (part2 inputf2))
