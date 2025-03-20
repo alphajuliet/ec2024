@@ -19,5 +19,13 @@
   [(count grid) (count (first grid))])
 
 (def T (partial apply mapv vector))
+
+(defn map-vals
+  "Map a function over the values of a map"
+  [f m]
+  (reduce-kv (fn [acc k v]
+              (assoc acc k (f v)))
+            {}
+            m))
   
 ;; The End
