@@ -60,7 +60,9 @@
   (def testf1 "data/q06_p1_test.txt")
   (def inputf1 "data/q06_p1.txt")
   (def inputf2 "data/q06_p2.txt")
+  (def inputf3 "data/q06_p3.txt")
 
   (part1 testf1)
   (part1 inputf1)
-  (part2 inputf2))
+  (part2 inputf2)
+  (part2 inputf3))
