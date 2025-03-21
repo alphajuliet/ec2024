@@ -1,37 +1,100 @@
-(ns q07 
+(ns q07
   (:require [clojure.string :as str]
             [util :as util]))
 
-(defn read-data
+(defn read-plans
   [data]
   (reduce (fn [acc line]
-           (let [[name path] (str/split line #":")]
-             (assoc acc name (map first (str/split path #",")))))
-         {}
-         (str/split-lines data)))
+            (let [[name path] (str/split line #":")]
+              (assoc acc name (map first (str/split path #",")))))
+          {}
+          (str/split-lines data)))
 
-(defn eval-track
-  "Evaluate the score for a track over n segments"
+(defn read-track
+  [track]
+  (let [lines (str/split-lines track)
+        height (count lines)
+        width (count (first lines))]
+    (concat
+     ;; Top row, left to right
+     (seq (first lines))
+     ;; Right side, top to bottom (excluding first and last char)
+     (map #(nth % (dec width)) (take (dec height) (rest lines)))
+     ;; Bottom row, right to left (excluding first char)
+     (rest (reverse (seq (last lines))))
+     ;; Left side, bottom to top (excluding first and last char)
+     (map first (reverse (rest (butlast lines)))))))
+
+(defn eval-plans
+  "Evaluate the score for a plan over n segments"
   [track n]
   (loop [t (cycle track)
          acc []
          ctr 10
          i 0]
-    (if (>= i n) 
+    (if (>= i n)
       (reduce + acc)
       ;; else
       (let [delta (case (first t)
                     \+ 1
                     \- -1
-                    \= 0)
-            ctr' (+ ctr delta) ]
+                    \= 0
+                    \S 0)
+            ctr' (max 0 (+ ctr delta))]
         (recur (rest t) (conj acc ctr') ctr' (inc i))))))
+
+(defn eval-segment
+  "Evaluate a plan over a single segment of track"
+  [plan track init-power]
+  (let [track-len (count track)]
+    (loop [p (cycle plan)
+           t (rest (cycle track))
+           acc []
+           pwr init-power
+           i 0]
+      (if (>= i track-len)
+        {:total (reduce + acc) :power pwr}
+      ;; else
+        (let [delta (case (first p)
+                      \+ 1
+                      \- -1
+                      \= 0)
+              delta' (case (first t)
+                       \+ 1
+                       \- -1
+                       \= delta
+                       \S delta)
+              pwr' (max 0 (+ pwr delta'))]
+          (recur (rest p) (rest t) (conj acc pwr') pwr' (inc i)))))))
+
+(defn eval-segments
+  "Score n segments"
+  [plan track loops]
+  (reduce (fn [acc _]
+            (let [{:keys [:total :power]} (eval-segment plan track (:power acc))]
+              (-> acc
+                  (update :total + total)
+                  (assoc :power power))))
+          {:total 0 :power 10} ; Starting conditions
+          (range loops)))
 
 (defn part1
   [fname]
-  (let [plans (read-data (slurp fname))]
+  (let [plans (read-plans (slurp fname))]
     (->> plans
-         (util/map-vals #(eval-track % 10))
+         (util/map-vals #(eval-plans % 10))
+         (sort-by val)
+         (map first)
+         reverse
+         str/join)))
+
+(defn part2
+  [plan-fname track-fname]
+  (let [plans (read-plans (slurp plan-fname))
+        track (read-track (slurp track-fname))]
+    (->> plans
+         (util/map-vals #(eval-segments % track 10))
+         (util/map-vals :total)
          (sort-by val)
          (map first)
          reverse
@@ -40,6 +103,15 @@
 (comment
   (def testf1 "data/q07_p1_test.txt")
   (def inputf1 "data/q07_p1.txt")
+
   (part1 testf1)
-  (part1 inputf1))
+  (part1 inputf1)
+
+  (def testf2 "data/q07_p1_test.txt")
+  (def testf2_track "data/q07_p2_test_track.txt")
+  (def inputf2 "data/q07_p2.txt")
+  (def inputf2_track "data/q07_p2_track.txt")
+
+  (part2 testf2 testf2_track)
+  (part2 inputf2 inputf2_track))
 ;; The End
