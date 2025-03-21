@@ -1,10 +1,9 @@
 (ns util
   (:require [clojure.string :as str]))
-  
 (defn mapmap
   "Map a function over a collection of collections"
   [f coll]
-  (mapv (partial mapv f) coll))
+  (mapv #(mapv f %) coll))
 
 (defn read-data 
   "Reads the data file and returns a list of strings"
@@ -18,7 +17,9 @@
   [grid]
   [(count grid) (count (first grid))])
 
-(def T (partial apply mapv vector))
+(def T 
+  "Transpose a 2D collection"
+  (partial apply mapv vector))
 
 (defn map-vals
   "Map a function over the values of a map"
