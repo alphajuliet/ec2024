@@ -4,3 +4,4 @@ data/
 .cpcache/
 .lsp/
 .nrepl-port
+.aider*

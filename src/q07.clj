@@ -44,8 +44,8 @@
             ctr' (max 0 (+ ctr delta))]
         (recur (rest t) (conj acc ctr') ctr' (inc i))))))
 
-(defn eval-segment
-  "Evaluate a plan over a single segment of track"
+(defn eval-track
+  "Evaluate a plan over a single loop of track"
   [plan track init-power]
   (let [track-len (count track)]
     (loop [p (cycle plan)
@@ -66,11 +66,11 @@
               pwr' (max 0 (+ pwr delta'))]
           (recur (rest p) (rest t) (conj acc pwr') pwr' (inc i)))))))
 
-(defn eval-segments
-  "Score n segments"
+(defn eval-loops
+  "Score n loops"
   [plan track loops]
   (reduce (fn [acc _]
-            (let [{:keys [:total :power]} (eval-segment plan track (:power acc))]
+            (let [{:keys [:total :power]} (eval-track plan track (:power acc))]
               (-> acc
                   (update :total + total)
                   (assoc :power power))))
@@ -93,7 +93,7 @@
   (let [plans (read-plans (slurp plan-fname))
         track (read-track (slurp track-fname))]
     (->> plans
-         (util/map-vals #(eval-segments % track 10))
+         (util/map-vals #(eval-loops % track 10))
          (util/map-vals :total)
          (sort-by val >)
          (map first)
