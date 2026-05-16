@@ -30,31 +30,32 @@
 
 (defn eval-plans
   "Evaluate the score for a plan over n segments"
-  [track n]
-  (loop [t (cycle track)
+  [plan n]
+  (loop [p (cycle plan)
          acc []
          ctr 10
          i 0]
     (if (>= i n)
       (reduce + acc)
-      (let [delta (case (first t)
+      ;; else
+      (let [delta (case (first p)
                     \+ 1
                     \- -1
-                    (\= \S) 0)
+                    \= 0)
             ctr' (max 0 (+ ctr delta))]
-        (recur (rest t) (conj acc ctr') ctr' (inc i))))))
+        (recur (rest p) (conj acc ctr') ctr' (inc i))))))
 
 (defn eval-track
   "Evaluate a plan over a single loop of track"
   [plan track init-power]
   (let [track-len (count track)]
-    (loop [p (cycle plan)
+    (loop [p plan
            t (rest (cycle track))
            acc []
            pwr init-power
            i 0]
       (if (>= i track-len)
-        {:total (reduce + acc) :power pwr}
+        {:total (reduce + acc) :power pwr :plan p}
         (let [delta (case (first p)
                       \+ 1
                       \- -1
@@ -70,11 +71,12 @@
   "Score n loops"
   [plan track loops]
   (reduce (fn [acc _]
-            (let [{:keys [:total :power]} (eval-track plan track (:power acc))]
+            (let [{:keys [:total :power :plan]} (eval-track (:plan acc) track (:power acc))]
               (-> acc
                   (update :total + total)
-                  (assoc :power power))))
-          {:total 0 :power 10} ; Starting conditions
+                  (assoc :power power)
+                  (assoc :plan plan))))
+          {:total 0 :power 10 :plan (cycle plan)} ; Starting conditions
           (range loops)))
 
 (defn part1
