@@ -19,14 +19,24 @@
 
 (def T 
   "Transpose a 2D collection"
-  (partial apply mapv vector))
+  (partial apply mapv vector)
 
-(defn map-vals
   "Map a function over the values of a map"
   [f m]
   (reduce-kv (fn [acc k v]
               (assoc acc k (f v)))
             {}
             m))
-  
+
+(defn take-until
+  "Returns a lazy sequence of successive items from coll until
+   (pred item) returns true, including that item. pred must be
+   free of side-effects."
+  [pred coll]
+  (lazy-seq
+    (when-let [s (seq coll)]
+      (if (pred (first s))
+        (cons (first s) nil)
+        (cons (first s) (take-until pred (rest s)))))))
+
 ;; The End
