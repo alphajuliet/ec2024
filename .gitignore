@@ -5,3 +5,4 @@ data/
 .lsp/
 .nrepl-port
 .aider*
+.zed/

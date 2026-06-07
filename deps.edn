@@ -10,4 +10,9 @@
                   :extra-deps {io.github.cognitect-labs/test-runner
                                {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
                   :main-opts ["-m" "cognitect.test-runner"]
-                  :exec-fn cognitect.test-runner.api/test}}}
+                  :exec-fn cognitect.test-runner.api/test}
+           :zed-repl {:extra-deps 
+                      {io.github.ryukzak/zed-nrepl
+                       {:git/url "https://github.com/ryukzak/zed-nrepl.git"
+                        :git/sha "e88fb5b3025e865a2c25d007b8fcd56d7086b1a9"}}
+                      :main-opts ["-m" "zed-nrepl.core"]}}}

@@ -1,11 +1,12 @@
 (ns util
   (:require [clojure.string :as str]))
+
 (defn mapmap
   "Map a function over a collection of collections"
   [f coll]
   (mapv #(mapv f %) coll))
 
-(defn read-data 
+(defn read-data
   "Reads the data file and returns a list of strings"
   [fname]
   (->> fname
@@ -17,21 +18,23 @@
   [grid]
   [(count grid) (count (first grid))])
 
-(def T 
+(def T
   "Transpose a 2D collection"
-  (partial apply mapv vector)
+  (partial apply mapv vector))
 
+(defn map-vals
   "Map a function over the values of a map"
   [f m]
-  (reduce-kv (fn [acc k v]
-              (assoc acc k (f v)))
-            {}
-            m))
+  (reduce-kv
+    (fn [acc k v]
+      (assoc acc k (f v)))
+    {}
+    m))
 
 (defn take-until
   "Returns a lazy sequence of successive items from coll until
-   (pred item) returns true, including that item. pred must be
-   free of side-effects."
+  (pred item) returns true, including that item. pred must be
+  free of side-effects."
   [pred coll]
   (lazy-seq
     (when-let [s (seq coll)]
