@@ -66,12 +66,21 @@
          vals
          (apply +))))
 
+(defn part3
+  "Solution for part 3"
+  [fname]
+  (let [rules (read-data fname)]
+    rules))
+
 (comment
   (def testf1 "data/q11_p1_test.txt")
   (def inputf1 "data/q11_p1.txt")
 
   (def testf2 "data/q11_p2_test.txt")
   (def inputf2 "data/q11_p2.txt")
+
+  (def testf3 "data/q11_p3_test.txt")
+  (def inputf3 "data/q11_p3.txt")
 
   (part1 testf1)
   (part1 inputf1)
