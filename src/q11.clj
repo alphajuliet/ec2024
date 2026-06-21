@@ -13,6 +13,17 @@
                  (assoc (first k) -1))]
     {(first k) dest}))
 
+(defn create-rule-p3
+  "Convert a substition rule <src>: <dest> into a hash"
+  ;; String -> Map String (Map String Int)
+  [s]
+  (let [[k v] (str/split s #":")
+        dest (-> v
+                 (str/split #",")
+                 frequencies
+                 (assoc k -1))]
+    {k dest}))
+
 (defn read-data
   "Read the substitution rules into a hash map."
   ;; String -> Map Char (Map Char Int)
@@ -21,6 +32,15 @@
        slurp
        str/split-lines
        (into {} (map create-rule))))
+
+(defn read-data-p3
+  "Read the part 3 substitution rules into a hash map."
+  ;; String -> Map Char (Map String Int)
+  [f]
+  (->> f
+       slurp
+       str/split-lines
+       (into {} (map create-rule-p3))))
 
 (defn convert-one
   "Convert the given character in the input according to its rule."
@@ -66,25 +86,37 @@
          vals
          (apply +))))
 
+(defn total
+  "Calculate the total count of all characters after 20 generations."
+  [rules init]
+  (->> (reduce
+        (fn [acc _] (convert rules acc))
+        init
+        (range 20))
+       vals
+       (apply +)))
+
 (defn part3
   "Solution for part 3"
   [fname]
-  (let [rules (read-data fname)]
-    rules))
-
+  (let [rules (read-data-p3 fname)
+        totals (map #(total rules {% 1}) (keys rules))]
+    (- (apply max totals) (apply min totals))))
+             
 (comment
   (def testf1 "data/q11_p1_test.txt")
   (def inputf1 "data/q11_p1.txt")
-
-  (def testf2 "data/q11_p2_test.txt")
-  (def inputf2 "data/q11_p2.txt")
-
-  (def testf3 "data/q11_p3_test.txt")
-  (def inputf3 "data/q11_p3.txt")
-
   (part1 testf1)
   (part1 inputf1)
 
-  (part2 inputf2))
+  (def testf2 "data/q11_p2_test.txt")
+  (def inputf2 "data/q11_p2.txt")
+  (part2 inputf2)
+  
+  (def testf3 "data/q11_p3_test.txt")
+  (def inputf3 "data/q11_p3.txt")
+  (part3 testf3)
+  (part3 inputf3))
+  ;; not 947608161037
 
 ;; The End
