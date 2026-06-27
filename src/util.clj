@@ -46,7 +46,7 @@
 (defn mfind-all
   "Return all the row and column of the given value in a matrix."
   [m x]
-  (let [[r c] (m/shape m)]
+  (let [[_ c] (m/shape m)]
     (->> m
          flatten
          (map-indexed (fn [idx val]
