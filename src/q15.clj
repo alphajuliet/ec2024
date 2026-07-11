@@ -11,7 +11,7 @@
        str/split-lines
        (map #(str/split % #""))))
 
-(defn find-entry 
+(defn find-entry
   "Find the entry point in the top wall"
   [wall]
   (->> wall
@@ -31,43 +31,85 @@
          (filter (fn [[r c]]
                    (and (<= 0 r (dec rmax))
                         (<= 0 c (dec cmax))
-                        (re-matches #"[.H]" (m/mget m r c))))))))
+                        (re-matches #"[.A-Z]" (m/mget m r c))))))))
+
+(defn max-states
+  "An upper bound on the number of reachable states in the grid, used to
+    let searches run to completion regardless of grid size."
+  [m]
+  (apply * (m/shape m)))
 
 (defn shortest-path
-  "Find the shortest path from the entry to the target"
+  "Find the shortest path from the start to the target"
   [m start target]
-  (-> (sch/shortest-path (partial children m)
-                         (constantly 1)
-                         1000
-                         start
-                         target)
+  (-> (sch/shortest-path
+       (partial children m)
+       (constantly 1)
+       (max-states m)
+       start
+       target)
       second
       (get target)))
-  
+
+(defn herb-locations
+  "Find all the available herb locations by type."
+  [m]
+  (->> m
+       m/to-vector
+       (filter #(re-matches #"[A-Z]" %))
+       set
+       (map #(util/mfind-all m %))))
+
+(defn shortest-round-trip
+  "Find the shortest path from the start, visiting all given nodes
+    in any order."
+  [m start targets]
+  (sch/shortest-round-trip-visiting-all
+   (partial children m)
+   (constantly 1)
+   (max-states m)
+   start
+   targets))
+
+(defn shortest-round-trip-one-per-class
+  "Find the shortest round trip from the start, visiting exactly one
+    node from each class (e.g. one herb of each type) in any order."
+  [m start classes]
+  (sch/shortest-round-trip-visiting-one-per-class
+   (partial children m)
+   (constantly 1)
+   (max-states m)
+   start
+   classes))
+
 (defn part1
   "Solution for part 1"
   [fname]
   (let [grid (read-data fname)
         entry (vector 0 (find-entry (first grid)))
-        herbs (util/mfind-all grid "H")]
-    (->> herbs
+        herb-locs (util/mfind-all grid "H")]
+    (->> herb-locs
          (map #(shortest-path grid entry %))
          (apply min)
          (* 2))))
 
 (defn part2
   "Solution for part 2"
-  [fname])
-  
+  [fname]
+  (let [grid (read-data fname)
+        entry (vector 0 (find-entry (first grid)))
+        herb-locs (herb-locations grid)]
+    (:cost (shortest-round-trip-one-per-class grid entry herb-locs))))
+
 (comment
   (def testf1 "data/q15_p1_test.txt")
   (def inputf1 "data/q15_p1.txt")
 
-  (def testf2 "data/q15_p2_test.txt")
-  (def inputf2 "data/q15_p2.txt")
-
   (part1 testf1)
   (part1 inputf1)
+
+  (def testf2 "data/q15_p2_test.txt")
+  (def inputf2 "data/q15_p2.txt")
 
   (part2 testf2)
   (part2 inputf2))
