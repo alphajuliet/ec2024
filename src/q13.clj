@@ -14,8 +14,7 @@
        (map #(str/split % #""))))
 
 (defn children
-  "Find all the children of the given node, i.e. digits or 'E'. 
-   Only go up, right, or down."
+  "Find all valid neighbours of the given node (digits, E, or S) in all four directions."
   ;; children : Matrix -> [Int Int] -> [[Int Int]]
   [m rc]
   (let [nn [[-1 0] [0 1] [1 0] [0 -1]]
@@ -25,7 +24,7 @@
          (filter (fn [[r c]]
                    (and (<= 0 r (dec rmax))
                         (<= 0 c (dec cmax))
-                        (re-matches #"\d|E" (m/mget m r c))))))))
+                        (re-matches #"\d|E|S" (m/mget m r c))))))))
 
 (defn cost
   "Find the cost of moving from the given node to the given child."
@@ -34,7 +33,7 @@
   (let [curr (m/mget m r0 c0)
         next (m/mget m r1 c1)
         e0   (if (= curr "S") 0 (Integer/parseInt curr))
-        e1   (if (= next "E") 0 (Integer/parseInt next))
+        e1   (if (or (= next "S") (= next "E")) 0 (Integer/parseInt next))
         d    (abs (- e1 e0))]
     (inc (min d (- 10 d)))))
 
@@ -42,12 +41,12 @@
   "Find the length of the shortest path"
   ;; shortest-path : Vector (Vector a) -> [Int Int] -> [Int Int] -> Int
   [m start end]
-  (-> (sch/shortest-path (partial children m) (partial cost m) 1000 start end)
+  (-> (sch/shortest-path (partial children m) (partial cost m) 50000 start end)
       second
       (get end)))
 
 (defn part1
-  "Solution for part 1"
+  "Solution for parts 1 and 2"
   [fname]
   (let [m (read-data fname)
         start (first (util/mfind-all m "S"))
@@ -55,10 +54,15 @@
     (println "start:" start "end:" end)
     (shortest-path m start end)))
 
-(defn part2
-  "Solution for part 2"
+(defn part3
+  "Solution for part 3"
   [fname]
-  fname)
+  (let [m (read-data fname)
+        starts (util/mfind-all m "S")
+        end (first (util/mfind-all m "E"))
+        xf (comp (map #(shortest-path m % end))
+                 (remove nil?))]
+    (transduce xf min ##Inf starts)))
 
 (comment
   (def testf1 "data/q13_p1_test.txt")
@@ -67,10 +71,12 @@
   (part1 testf1)
   (part1 inputf1)
 
-  (def testf2 "data/q13_p2_test.txt")
   (def inputf2 "data/q13_p2.txt")
+  (part1 inputf2)
 
-  (part2 testf2)
-  (part2 inputf2))
+  (def testf3 "data/q13_p3_test.txt")
+  (def inputf3 "data/q13_p3.txt")
 
+  (part3 testf3)
+  (part3 inputf3))
 ;; The End
