@@ -44,7 +44,7 @@
         (cons (first s) (take-until pred (rest s)))))))
 
 (defn mfind-all
-  "Return all the row and column of the given value in a matrix."
+  "Return all coordinates of the given value in a matrix."
   [m x]
   (let [[_ c] (m/shape m)]
     (->> m
