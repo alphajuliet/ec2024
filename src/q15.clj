@@ -112,6 +112,8 @@
   (def inputf2 "data/q15_p2.txt")
 
   (part2 testf2)
-  (part2 inputf2))
+  (part2 inputf2)
 
+  (def inputf3 "data/q15_p3.txt")
+  (part2 inputf3))
 ;; The End
