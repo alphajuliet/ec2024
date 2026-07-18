@@ -23,6 +23,29 @@
   "Transpose a 2D collection"
   (partial apply mapv vector))
 
+(defn manhattan
+  "Calculate the Manhattan distance between two points"
+  [[x1 y1] [x2 y2]]
+  (+ (Math/abs (- x1 x2))
+     (Math/abs (- y1 y2))))
+
+(defn mst-length
+  "Compute the total edge length of the minimum spanning tree connecting
+  coords, using Prim's algorithm. distance-fn defaults to Manhattan
+  distance."
+  ([coords] (mst-length coords manhattan))
+  ([coords distance-fn]
+   (let [start (first coords)]
+     (loop [dists (into {} (map (fn [p] [p (distance-fn start p)]) (rest coords)))
+            total 0]
+       (if (empty? dists)
+         total
+         (let [[nearest d] (apply min-key val dists)]
+           (recur (into {}
+                        (map (fn [[p pd]] [p (min pd (distance-fn nearest p))]))
+                        (dissoc dists nearest))
+                  (+ total d))))))))
+
 (defn map-vals
   "Map a function over the values of a map"
   [f m]
@@ -44,7 +67,7 @@
         (cons (first s) (take-until pred (rest s)))))))
 
 (defn mfind-all
-  "Return all coordinates of the given value in a matrix."
+  "Return all coordinates of the given value x in the matrix m."
   [m x]
   (let [[_ c] (m/shape m)]
     (->> m
