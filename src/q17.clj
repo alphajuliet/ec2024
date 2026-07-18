@@ -32,18 +32,21 @@
 
 (defn part2
   "Solution for part 2"
-  [fname])
-
+  [fname]
+  (let [coords (read-data fname)]
+      (->> coords
+           util/mst-length
+           (+ (count coords)))))
 (comment
   (def testf1 "data/q17_p1_test.txt")
   (def inputf1 "data/q17_p1.txt")
 
-  (def testf2 "data/q17_p2_test.txt")
+  ;; (def testf2 "data/q17_p2_test.txt")
   (def inputf2 "data/q17_p2.txt")
  
   (part1 testf1)
   (part1 inputf1)
 
-  (part2 testf2)
+  ;; (part2 testf2)
   (part2 inputf2))
 ;; The End
